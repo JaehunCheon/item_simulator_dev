@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  userId Int @id @default(autoincrement()) @map("userId")
+  ID String @unique @map("ID")
+  password String @map("password")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  UserInfos UserInfos?
+  UserHistories UserHistories[]
+  Characters Characters[]
+
+  @@map("Users")
+}
+
+model UserHistories {
+  userHistoryId String @id @default(uuid()) @map("userHistoryId")
+  UserId Int @map("UserId")
+  changedField String @map("changedField")
+  oldValue String? @map("oldValue")
+  newValue String @map("newValue")
+  changedAt DateTime @default(now()) @map("changedAt")
+
+  User Users @relation(fields: [UserId], references:[userId], onDelete:Cascade)
+  @@map("UserHistories")
+}
+
+
+model UserInfos {
+  userInfoId   Int      @id @default(autoincrement()) @map("userInfoId")
+  UserId       Int      @unique @map("UserId") // 사용자(Users) 테이블을 참조하는 외래키
+  name         String   @map("name")
+  age          Int?     @map("age")
+  gender       String   @map("gender")
+  profileImage String?  @map("profileImage")
+  createdAt    DateTime @default(now()) @map("createdAt")
+  updatedAt    DateTime @updatedAt @map("updatedAt")
+
+  // Users 테이블과 관계를 설정합니다.
+  user Users @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+
+  @@map("UserInfos")
+}
+
+model Characters {
+  characterId   Int       @id @default(autoincrement()) @map("characterId") @unique
+  UserId        Int       @map("UserId")
+  name          String    @map("name") @unique
+  health        Int       @default(500) @map("health")
+  power         Int       @default(100) @map("power")
+  money         Int       @default(10000) @map("money")
+
+  createdAt    DateTime @default(now()) @map("createdAt")
+  updatedAt    DateTime @updatedAt @map("updatedAt")
+
+  user Users @relation(fields: [UserId], references: [userId])
+
+  @@map("Characters")
+}
+
+model Items{
+  item_code Int @id @default(autoincrement()) @map("itemId")
+  name String @unique @map("name")
+  health Int? @map("health")
+  power Int? @map("power")
+  price Int @map("price")
+
+  @@map("Items")
+}
